@@ -8,6 +8,7 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [promoCode, setPromoCode] = useState('')
   const supabase = createClient()
 
   useEffect(() => {
@@ -31,7 +32,8 @@ export default function PricingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           priceId: 'price_1SbpHh1d4S9Vpl960mk81QWM',
-          email: user.email
+          email: user.email,
+          promoCode: promoCode || undefined
         }),
       })
       const { url } = await response.json()
@@ -136,13 +138,22 @@ export default function PricingPage() {
                 Priority support
               </li>
             </ul>
-            <button
-              onClick={handleUpgrade}
-              disabled={loading}
-              className="block w-full text-center bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 disabled:opacity-50"
-            >
-              {loading ? 'Loading...' : 'Upgrade to Pro'}
-            </button>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Promo code (optional)"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                className="w-full px-4 py-2 rounded-lg border-2 border-white/20 bg-white/10 text-white placeholder-white/60 focus:outline-none focus:border-white/40"
+              />
+              <button
+                onClick={handleUpgrade}
+                disabled={loading}
+                className="block w-full text-center bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 disabled:opacity-50"
+              >
+                {loading ? 'Loading...' : 'Upgrade to Pro'}
+              </button>
+            </div>
           </div>
         </div>
       </div>

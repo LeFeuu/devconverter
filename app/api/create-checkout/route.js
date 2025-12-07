@@ -11,11 +11,11 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 })
     }
 
-    const { priceId, email } = await request.json()
+    const { priceId, email, promoCode } = await request.json()
     
-    console.log('Creating checkout session for:', email, 'with price:', priceId)
+    console.log('Creating checkout session for:', email, 'with price:', priceId, 'promo:', promoCode)
 
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams = {
       payment_method_types: ['card'],
       customer_email: email,
       line_items: [
@@ -27,7 +27,22 @@ export async function POST(request) {
       mode: 'subscription',
       success_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://devconverter-black.vercel.app'}/converter?success=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://devconverter-black.vercel.app'}/pricing?canceled=true`,
-    })
+    }
+
+    // Ajouter le code promo si fourni
+    if (promoCode) {
+      // Récupérer le coupon pour valider qu'il existe
+      try {
+        const coupon = await stripe.coupons.retrieve(promoCode)
+        sessionParams.discounts = [{ coupon: coupon.id }]
+        console.log('Promo code applied:', coupon.id)
+      } catch (error) {
+        console.log('Invalid promo code:', promoCode)
+        // On continue sans le promo code si invalide
+      }
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams)
 
     return NextResponse.json({ url: session.url })
   } catch (err) {
