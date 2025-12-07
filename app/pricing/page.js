@@ -30,7 +30,7 @@ export default function PricingPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          priceId: 'price_1SbpHh1d4S9Vpl960mk81QWM',
+          priceId: 'price_1Sbr0a0BZ2Lc22YtGQYAQPdP',
           email: user.email
         }),
       })
