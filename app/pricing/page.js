@@ -1,17 +1,38 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
+import AuthModal from '../components/AuthModal'
 
 export default function PricingPage() {
   const [loading, setLoading] = useState(false)
+  const [user, setUser] = useState(null)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const supabase = createClient()
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+    getUser()
+  }, [])
 
   const handleUpgrade = async () => {
+    if (!user) {
+      setShowAuthModal(true)
+      return
+    }
+
     setLoading(true)
     try {
       const response = await fetch('/api/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId: 'price_1SbpHh1d4S9Vpl960mk81QWM' }),
+        body: JSON.stringify({ 
+          priceId: 'price_1SbpHh1d4S9Vpl960mk81QWM',
+          email: user.email
+        }),
       })
       const { url } = await response.json()
       if (url) {
@@ -125,6 +146,7 @@ export default function PricingPage() {
           </div>
         </div>
       </div>
+      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
     </div>
   )
 }
