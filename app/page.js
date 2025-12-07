@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import AuthButton from './components/AuthButton'
 
 export default function Home() {
   return (
@@ -17,6 +18,7 @@ export default function Home() {
               <Link href="/pricing" className="text-gray-700 hover:text-blue-600">
                 Pricing
               </Link>
+              <AuthButton />
               <Link 
                 href="/converter" 
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
