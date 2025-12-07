@@ -84,6 +84,23 @@ export default function Home() {
             ))}
           </div>
         </div>
+
+        {/* SEO Content */}
+        <div className="mt-20 max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold mb-4">Why Use DevConverter?</h2>
+          <p className="text-gray-600 mb-4">
+            DevConverter is the fastest way to convert data between JSON, CSV, and YAML formats. 
+            Whether you're a developer working with APIs, a data analyst processing datasets, or 
+            anyone who needs quick data conversions, our tool makes it simple and secure.
+          </p>
+          <h3 className="text-xl font-semibold mb-3">Popular Conversions</h3>
+          <ul className="text-gray-600 space-y-2">
+            <li>• <strong>JSON to CSV:</strong> Convert JSON arrays to CSV spreadsheets</li>
+            <li>• <strong>CSV to JSON:</strong> Transform CSV data into JSON format</li>
+            <li>• <strong>JSON to YAML:</strong> Convert JSON config files to YAML</li>
+            <li>• <strong>YAML to JSON:</strong> Parse YAML back to JSON</li>
+          </ul>
+        </div>
       </div>
 
       {/* Footer */}
