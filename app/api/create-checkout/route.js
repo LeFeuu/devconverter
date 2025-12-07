@@ -5,7 +5,15 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 export async function POST(request) {
   try {
+    // Vérifier que Stripe est bien configuré
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('STRIPE_SECRET_KEY is not set')
+      return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 })
+    }
+
     const { priceId } = await request.json()
+    
+    console.log('Creating checkout session for price:', priceId)
 
     const session = await stripe.checkout.sessions.create({
       line_items: [
@@ -21,6 +29,7 @@ export async function POST(request) {
 
     return NextResponse.json({ url: session.url })
   } catch (err) {
+    console.error('Stripe error:', err)
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
