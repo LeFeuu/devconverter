@@ -1,3 +1,5 @@
+import './globals.css'
+
 export const metadata = {
   title: 'DevConverter - Free JSON, CSV, YAML Converter for Developers',
   description: 'Convert JSON to CSV, CSV to JSON, YAML to JSON instantly. Free online converter tool for developers. Fast, secure, client-side processing. No signup required.',
