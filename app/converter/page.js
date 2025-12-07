@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 import { jsonToCsv, csvToJson, jsonToYaml, yamlToJson } from '@/lib/converters'
+import AuthModal from '../components/AuthModal'
 
 export default function ConverterPage() {
   const [input, setInput] = useState('')
@@ -11,22 +13,50 @@ export default function ConverterPage() {
   const [toFormat, setToFormat] = useState('CSV')
   const [conversionsToday, setConversionsToday] = useState(0)
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [user, setUser] = useState(null)
+  const [isPro, setIsPro] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const supabase = createClient()
 
-  // Charger le compteur de conversions depuis localStorage
+  // Charger l'utilisateur et son statut Pro
   useEffect(() => {
-    const today = new Date().toDateString()
-    const stored = localStorage.getItem('conversions')
-    if (stored) {
-      const data = JSON.parse(stored)
-      if (data.date === today) {
-        setConversionsToday(data.count)
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+      
+      if (user) {
+        // Récupérer le profil avec le statut is_pro
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_pro')
+          .eq('id', user.id)
+          .single()
+        
+        if (profile) {
+          setIsPro(profile.is_pro)
+        }
+      }
+    }
+    getUser()
+  }, [])
+
+  // Charger le compteur de conversions depuis localStorage (seulement pour utilisateurs gratuits)
+  useEffect(() => {
+    if (!isPro) {
+      const today = new Date().toDateString()
+      const stored = localStorage.getItem('conversions')
+      if (stored) {
+        const data = JSON.parse(stored)
+        if (data.date === today) {
+          setConversionsToday(data.count)
+        } else {
+          localStorage.setItem('conversions', JSON.stringify({ date: today, count: 0 }))
+        }
       } else {
         localStorage.setItem('conversions', JSON.stringify({ date: today, count: 0 }))
       }
-    } else {
-      localStorage.setItem('conversions', JSON.stringify({ date: today, count: 0 }))
     }
-  }, [])
+  }, [isPro])
 
   const incrementConversions = () => {
     const today = new Date().toDateString()
@@ -36,8 +66,14 @@ export default function ConverterPage() {
   }
 
   const handleConvert = () => {
-    // Vérifier la limite gratuite
-    if (conversionsToday >= 5) {
+    // Vérifier si l'utilisateur doit se connecter
+    if (!user) {
+      setShowAuthModal(true)
+      return
+    }
+
+    // Vérifier la limite gratuite (seulement pour non-Pro)
+    if (!isPro && conversionsToday >= 5) {
       setShowUpgradeModal(true)
       return
     }
@@ -70,7 +106,10 @@ export default function ConverterPage() {
 
     if (result.success) {
       setOutput(result.result)
-      incrementConversions()
+      // Incrémenter seulement pour les utilisateurs gratuits
+      if (!isPro) {
+        incrementConversions()
+      }
     } else {
       setOutput(`Error: ${result.error}`)
     }
@@ -180,6 +219,9 @@ export default function ConverterPage() {
           </div>
         </div>
       </div>
+
+      {/* Auth Modal */}
+      {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
 
       {/* Upgrade Modal */}
       {showUpgradeModal && (
