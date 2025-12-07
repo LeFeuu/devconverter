@@ -1,6 +1,29 @@
+'use client'
+import { useState } from 'react'
 import Link from 'next/link'
 
 export default function PricingPage() {
+  const [loading, setLoading] = useState(false)
+
+  const handleUpgrade = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch('/api/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId: 'price_1SbpHh1d4S9Vpl960mk81QWM' }),
+      })
+      const { url } = await response.json()
+      if (url) {
+        window.location.href = url
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('Erreur lors de la redirection vers Stripe')
+    }
+    setLoading(false)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
@@ -93,13 +116,12 @@ export default function PricingPage() {
               </li>
             </ul>
             <button
-              className="block w-full text-center bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100"
+              onClick={handleUpgrade}
+              disabled={loading}
+              className="block w-full text-center bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 disabled:opacity-50"
             >
-              Upgrade to Pro
+              {loading ? 'Loading...' : 'Upgrade to Pro'}
             </button>
-            <p className="text-center text-sm mt-4 opacity-80">
-              Coming soon! Join the waitlist
-            </p>
           </div>
         </div>
       </div>
